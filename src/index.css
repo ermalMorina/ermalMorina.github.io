@@ -392,18 +392,184 @@ a {
 
 .sheet {
   position: relative;
-  width: min(880px, calc(100% - 32px));
+  z-index: 1;
+  width: min(880px, calc(100% - 24px));
   margin: 0 auto;
-  padding: 28px 0 80px;
+  padding: 36px 0 88px;
 }
 
-.sheet__sky {
+.sheet__world {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
   background:
-    radial-gradient(circle at 50% 0%, #4a1238, #05010d 48%),
-    linear-gradient(#05010d, #120814);
+    radial-gradient(ellipse 70% 42% at 50% 12%, rgba(255, 90, 40, 0.28), transparent 58%),
+    radial-gradient(ellipse 90% 55% at 50% 0%, #4a1238 0%, #16051f 42%, #05010d 70%);
+}
+
+.sheet__glow {
+  position: absolute;
+  width: 42vw;
+  height: 42vw;
+  max-width: 420px;
+  max-height: 420px;
+  border-radius: 50%;
+  filter: blur(48px);
+  opacity: 0.45;
+  animation: sheet-glow 9s ease-in-out infinite alternate;
+}
+
+.sheet__glow--magenta {
+  left: -8%;
+  top: 18%;
+  background: #ff2bd6;
+}
+
+.sheet__glow--cyan {
+  right: -10%;
+  top: 28%;
+  background: #00f0ff;
+  animation-delay: -4s;
+}
+
+.sheet__stars {
+  position: absolute;
+  inset: 0 0 42%;
+  width: 100%;
+  height: 58%;
+  fill: #f7eeff;
+}
+
+.sheet__star--twinkle {
+  animation: sheet-twinkle 3.6s ease-in-out infinite;
+}
+
+.sheet__star--twinkle:nth-child(3n) {
+  animation-delay: -1.2s;
+}
+
+.sheet__star--twinkle:nth-child(5n) {
+  animation-delay: -2.4s;
+}
+
+.sheet__sun {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  width: min(280px, 56vw);
+  height: min(280px, 56vw);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 0 48px rgba(255, 107, 53, 0.55),
+    0 0 120px rgba(255, 43, 214, 0.35);
+}
+
+.sheet__sun-core {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #ffd27a 0%, #ff6b35 38%, #ff2bd6 78%, #6b1578 100%);
+}
+
+.sheet__sun-stripes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 46%;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 7px,
+    rgba(5, 1, 13, 0.78) 7px 12px
+  );
+}
+
+.sheet__skyline {
+  position: absolute;
+  left: -5%;
+  right: -5%;
+  width: 110%;
+  height: min(22vh, 180px);
+  bottom: 38%;
+  fill: #07010f;
+  filter: drop-shadow(0 0 8px rgba(255, 43, 214, 0.35));
+}
+
+.sheet__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 38%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #ff2bd6 18%, #ffd166 50%, #00f0ff 82%, transparent);
+  box-shadow: 0 0 18px #ff2bd6;
+}
+
+.sheet__grid {
+  position: absolute;
+  left: 50%;
+  bottom: -18%;
+  width: 180%;
+  height: 62%;
+  transform: translateX(-50%) perspective(420px) rotateX(68deg);
+  transform-origin: center top;
+  background-image:
+    linear-gradient(rgba(255, 43, 214, 0.38) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 240, 255, 0.28) 1px, transparent 1px);
+  background-size: 56px 56px;
+  animation: sheet-grid 24s linear infinite;
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 92%);
+}
+
+.sheet__road {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 46%;
+  height: 40%;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, transparent, rgba(255, 43, 214, 0.12) 30%, rgba(0, 240, 255, 0.08));
+  clip-path: polygon(47.5% 0, 52.5% 0, 100% 100%, 0 100%);
+}
+
+.sheet__road::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 3px;
+  height: 92%;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(
+    to bottom,
+    #ffd166 0 14px,
+    transparent 14px 28px
+  );
+  opacity: 0.7;
+  animation: sheet-dash 1.8s linear infinite;
+}
+
+.sheet__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(5, 1, 13, 0.55) 100%);
+}
+
+.sheet__panel {
+  position: relative;
+  z-index: 1;
+  padding: 28px 32px 40px;
+  background: rgba(6, 2, 16, 0.84);
+  border: 1px solid rgba(255, 43, 214, 0.32);
+  border-radius: 24px;
+  box-shadow:
+    0 0 0 1px rgba(0, 240, 255, 0.08),
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    0 0 60px rgba(255, 43, 214, 0.08);
+  backdrop-filter: blur(18px);
 }
 
 .sheet__topbar {
@@ -432,6 +598,8 @@ a {
 .sheet__hero h1 {
   margin: 10px 0 8px;
   font-size: clamp(40px, 9vw, 72px);
+  color: #fff;
+  text-shadow: 0 0 28px rgba(255, 43, 214, 0.28);
 }
 
 .sheet__place,
@@ -445,6 +613,7 @@ a {
 .sheet__lead {
   max-width: 62ch;
   font-size: 20px;
+  color: #f3eaff;
 }
 
 .sheet__note {
@@ -472,6 +641,7 @@ a {
   border: 1px solid var(--cyan);
   padding: 8px 12px;
   border-radius: 999px;
+  background: rgba(5, 1, 13, 0.55);
 }
 
 .sheet__langs li {
@@ -525,6 +695,39 @@ a {
   padding-bottom: 40px;
 }
 
+@keyframes sheet-grid {
+  to {
+    background-position: 0 56px;
+  }
+}
+
+@keyframes sheet-dash {
+  to {
+    background-position: 0 42px;
+  }
+}
+
+@keyframes sheet-glow {
+  from {
+    opacity: 0.28;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 0.55;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes sheet-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .hud__rail em {
     display: none;
@@ -545,10 +748,47 @@ a {
   }
 }
 
+@media (max-width: 720px) {
+  .sheet {
+    width: calc(100% - 16px);
+    padding: 22vh 0 56px;
+  }
+
+  .sheet__panel {
+    padding: 20px 16px 28px;
+    border-radius: 18px;
+    background: rgba(6, 2, 16, 0.9);
+  }
+
+  .sheet__sun {
+    top: 2%;
+    width: min(150px, 42vw);
+    height: min(150px, 42vw);
+  }
+
+  .sheet__skyline {
+    bottom: auto;
+    top: 11vh;
+    height: 11vh;
+  }
+
+  .sheet__horizon {
+    bottom: auto;
+    top: 21.5vh;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .loader__car,
   .loader {
     animation: none;
     transition: none;
+  }
+
+  .sheet__grid,
+  .sheet__road::after,
+  .sheet__glow,
+  .sheet__star--twinkle {
+    animation: none;
   }
 }
