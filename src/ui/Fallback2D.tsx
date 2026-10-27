@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import {
   EDUCATION,
   EXPERIENCE,
@@ -88,8 +89,10 @@ const BUILDINGS = [
 function NightWorld() {
   return (
     <div className="sheet__world" aria-hidden="true">
-      <div className="sheet__glow sheet__glow--magenta" />
-      <div className="sheet__glow sheet__glow--cyan" />
+      <div className="sheet__orb sheet__orb--a" />
+      <div className="sheet__orb sheet__orb--b" />
+      <div className="sheet__orb sheet__orb--c" />
+      <div className="sheet__orb sheet__orb--d" />
       <svg className="sheet__stars" viewBox="0 0 100 50" preserveAspectRatio="xMidYMin slice">
         {STARS.map(([x, y, r], i) => (
           <circle
@@ -118,95 +121,131 @@ function NightWorld() {
   )
 }
 
+function GlassCard({
+  tag = 'section',
+  labelledBy,
+  children,
+  eager = false,
+}: {
+  tag?: 'section' | 'header' | 'article'
+  labelledBy?: string
+  children: ReactNode
+  eager?: boolean
+}) {
+  const ref = useRef<HTMLElement>(null)
+  const [inView, setInView] = useState(eager)
+  const Tag = tag
+
+  useEffect(() => {
+    if (eager) return
+    const el = ref.current
+    if (!el) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setInView(true)
+      return
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true)
+          io.disconnect()
+        }
+      },
+      { threshold: 0.14, rootMargin: '0px 0px -8% 0px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [eager])
+
+  return (
+    <Tag ref={ref as never} className={`sheet__card${inView ? ' is-in' : ''}`} aria-labelledby={labelledBy}>
+      {children}
+    </Tag>
+  )
+}
+
 export function Fallback2D() {
   const reasonNote = useJourney((s) => s.quality)
 
   return (
     <main id="readable" className="sheet">
       <NightWorld />
-      <div className="sheet__panel">
-        <header className="sheet__hero">
-          <div className="sheet__topbar">
-            <p className="sheet__kicker">Night circuit · Readable mode</p>
-            <button type="button" className="hud__btn" onClick={() => useJourney.getState().setMode('3d')}>
-              Enter 3D drive
-            </button>
-          </div>
-          <p className="sheet__eyebrow">Software Developer</p>
-          <h1>{PROFILE.name}</h1>
-          <p className="sheet__place">{PROFILE.location}</p>
-          <p className="sheet__lead">{SUMMARY}</p>
-          <p className="sheet__mail">
-            <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+
+      <GlassCard tag="header" eager>
+        <div className="sheet__topbar">
+          <p className="sheet__kicker">Night circuit · Readable mode</p>
+          <button type="button" className="hud__btn" onClick={() => useJourney.getState().setMode('3d')}>
+            Enter 3D drive
+          </button>
+        </div>
+        <p className="sheet__eyebrow">Software Developer</p>
+        <h1>{PROFILE.name}</h1>
+        <p className="sheet__place">{PROFILE.location}</p>
+        {reasonNote === 'low' ? (
+          <p className="sheet__note">
+            2D mode keeps the CV readable on mobile, low-power devices, and reduced-motion settings.
           </p>
-          {reasonNote === 'low' ? (
-            <p className="sheet__note">
-              2D mode keeps the CV readable on mobile, low-power devices, and reduced-motion settings.
-            </p>
-          ) : null}
-        </header>
+        ) : null}
+      </GlassCard>
 
-        <section className="sheet__block" aria-labelledby="skills-title">
-          <p className="sheet__mile">{SECTIONS[2].kicker}</p>
-          <h2 id="skills-title">Key Skills</h2>
-          <ul className="sheet__chips">
-            {SKILLS.map((s) => (
-              <li key={s.label} style={{ borderColor: s.color, color: s.color }}>
-                {s.label}
-              </li>
-            ))}
-          </ul>
-        </section>
+      <GlassCard labelledBy="summary-title">
+        <p className="sheet__mile">{SECTIONS[1].kicker}</p>
+        <h2 id="summary-title">Professional Summary</h2>
+        <p className="sheet__lead">{SUMMARY}</p>
+      </GlassCard>
 
-        <section className="sheet__block" aria-labelledby="exp-title">
-          <p className="sheet__mile">Miles 03–06 · Timeline</p>
-          <h2 id="exp-title">Professional Experience</h2>
-          <ol className="sheet__timeline">
-            {EXPERIENCE.map((job) => (
-              <li key={job.id}>
-                <div className="sheet__stop" />
-                <div>
-                  <p className="sheet__role">{job.role}</p>
-                  <h3>{job.company}</h3>
-                  <p className="sheet__dates">{job.dates}</p>
-                  <p>{job.description}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </section>
+      <GlassCard labelledBy="skills-title">
+        <p className="sheet__mile">{SECTIONS[2].kicker}</p>
+        <h2 id="skills-title">Key Skills</h2>
+        <ul className="sheet__chips">
+          {SKILLS.map((s) => (
+            <li key={s.label} style={{ borderColor: s.color, color: s.color }}>
+              {s.label}
+            </li>
+          ))}
+        </ul>
+      </GlassCard>
 
-        <section className="sheet__block" aria-labelledby="edu-title">
-          <p className="sheet__mile">{SECTIONS[7].kicker}</p>
-          <h2 id="edu-title">Education & Certifications</h2>
-          <h3>{EDUCATION.degree}</h3>
-          <p>{EDUCATION.school}</p>
-          <h3 className="sheet__cert">{EDUCATION.certTitle}</h3>
-          <p>{EDUCATION.certBody}</p>
-        </section>
+      {EXPERIENCE.map((job, i) => (
+        <GlassCard key={job.id} labelledBy={`${job.id}-title`}>
+          <p className="sheet__mile">{SECTIONS[3 + i]?.kicker ?? `Stop 0${i + 1}`}</p>
+          <p className="sheet__role">{job.role}</p>
+          <h2 id={`${job.id}-title`}>{job.company}</h2>
+          <p className="sheet__dates">{job.dates}</p>
+          <p className="sheet__copy">{job.description}</p>
+        </GlassCard>
+      ))}
 
-        <section className="sheet__block" aria-labelledby="lang-title">
-          <p className="sheet__mile">{SECTIONS[8].kicker}</p>
-          <h2 id="lang-title">Languages</h2>
-          <ul className="sheet__langs">
-            {LANGUAGES.map((l) => (
-              <li key={l.name}>
-                <strong>{l.name}</strong>
-                <span>{l.level}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      <GlassCard labelledBy="edu-title">
+        <p className="sheet__mile">{SECTIONS[7].kicker}</p>
+        <h2 id="edu-title">Education & Certifications</h2>
+        <h3>{EDUCATION.degree}</h3>
+        <p className="sheet__copy">{EDUCATION.school}</p>
+        <h3 className="sheet__cert">{EDUCATION.certTitle}</h3>
+        <p className="sheet__copy">{EDUCATION.certBody}</p>
+      </GlassCard>
 
-        <section className="sheet__block sheet__block--end" aria-labelledby="contact-title">
-          <p className="sheet__mile">{SECTIONS[9].kicker}</p>
-          <h2 id="contact-title">Contact</h2>
-          <p>
-            <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
-          </p>
-          <p>{PROFILE.location}</p>
-        </section>
-      </div>
+      <GlassCard labelledBy="lang-title">
+        <p className="sheet__mile">{SECTIONS[8].kicker}</p>
+        <h2 id="lang-title">Languages</h2>
+        <ul className="sheet__langs">
+          {LANGUAGES.map((l) => (
+            <li key={l.name}>
+              <strong>{l.name}</strong>
+              <span>{l.level}</span>
+            </li>
+          ))}
+        </ul>
+      </GlassCard>
+
+      <GlassCard labelledBy="contact-title">
+        <p className="sheet__mile">{SECTIONS[9].kicker}</p>
+        <h2 id="contact-title">Contact</h2>
+        <p className="sheet__copy">
+          <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+        </p>
+        <p className="sheet__copy">{PROFILE.location}</p>
+      </GlassCard>
     </main>
   )
 }
